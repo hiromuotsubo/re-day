@@ -1,0 +1,14 @@
+:root {
+  --background: #f7f6f3;
+  --surface: #fff;
+  --ink: #262522;
+  --muted: #6a655e;
+  --line: #d8d4cd;
+  --accent: #715b47;
+}
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--ink);
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+}
