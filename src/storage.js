@@ -1,5 +1,6 @@
 const storeName = 'memories'
 let connection
+let storeImageBytes = false
 
 function database() {
   if (connection) return connection
@@ -21,7 +22,10 @@ export async function allPersonal() {
   const db = await database()
   return new Promise((resolve, reject) => {
     const request = db.transaction(storeName).objectStore(storeName).getAll()
-    request.onsuccess = () => resolve(request.result)
+    request.onsuccess = () => resolve(request.result.map(record => {
+      if (record.image instanceof Blob) return record
+      return { ...record, image: new Blob([record.image], { type: record.imageType }) }
+    }))
     request.onerror = () => reject(request.error)
   })
 }
@@ -39,8 +43,24 @@ async function write(operation) {
   })
 }
 
-export function saveMemory(record, previous) {
-  return write((store, abort) => {
+// WebKitの一部の保存領域ではBlobを書き込めないため、同じバイト列を保存する。
+async function withWritableImages(records, operation) {
+  if (!storeImageBytes) {
+    try { return await operation(records) }
+    catch (error) {
+      if (!['UnknownError', 'DataCloneError'].includes(error?.name)) throw error
+    }
+  }
+  const converted = await Promise.all(records.map(async record => ({
+    ...record, image: await record.image.arrayBuffer(), imageType: record.image.type,
+  })))
+  const result = await operation(converted)
+  storeImageBytes = true
+  return result
+}
+
+export function saveMemory(memory, previous) {
+  return withWritableImages([memory], ([record]) => write((store, abort) => {
     if (!previous) { store.add(record); return }
     const request = store.get(record.id)
     request.onsuccess = () => {
@@ -48,7 +68,7 @@ export function saveMemory(record, previous) {
         abort(new Error('この写真は別の画面で変更されました。詳細を開き直してください。'))
       } else { store.put(record) }
     }
-  })
+  }))
 }
 
 export function deleteMemory(record) {
@@ -62,17 +82,19 @@ export function deleteMemory(record) {
   })
 }
 
-export async function restoreMissing(records) {
-  let added = 0
-  await write(store => {
-    for (const record of records) {
-      const request = store.getKey(record.id)
-      request.onsuccess = () => {
-        if (request.result === undefined) { store.add(record); added++ }
+export function restoreMissing(records) {
+  return withWritableImages(records, async writable => {
+    let added = 0
+    await write(store => {
+      for (const record of writable) {
+        const request = store.getKey(record.id)
+        request.onsuccess = () => {
+          if (request.result === undefined) { store.add(record); added++ }
+        }
       }
-    }
+    })
+    return added
   })
-  return added
 }
 
 export function storageMessage(error) {
