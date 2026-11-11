@@ -1,0 +1,177 @@
+[
+  {
+    "id": "sample-favorite-01",
+    "image": "favorite-01.webp",
+    "date": "",
+    "alt": "緑に囲まれた岩壁から落ちる滝",
+    "tags": [
+      "滝",
+      "緑"
+    ]
+  },
+  {
+    "id": "sample-favorite-02",
+    "image": "favorite-02.webp",
+    "date": "",
+    "alt": "岩場の波しぶきにかかる虹",
+    "tags": [
+      "海",
+      "空"
+    ]
+  },
+  {
+    "id": "sample-favorite-03",
+    "image": "favorite-03.webp",
+    "date": "",
+    "alt": "岩の多い海岸に寄せる白い波",
+    "tags": [
+      "海"
+    ]
+  },
+  {
+    "id": "sample-favorite-04",
+    "image": "favorite-04.webp",
+    "date": "2025-11-03",
+    "alt": "黄緑の木々と青い水面",
+    "tags": [
+      "森",
+      "水辺"
+    ]
+  },
+  {
+    "id": "sample-favorite-05",
+    "image": "favorite-05.webp",
+    "date": "2025-11-07",
+    "alt": "色づいた木々の間を流れる滝",
+    "tags": [
+      "紅葉",
+      "滝"
+    ]
+  },
+  {
+    "id": "sample-favorite-06",
+    "image": "favorite-06.webp",
+    "date": "2025-11-07",
+    "alt": "木漏れ日に照らされた赤い紅葉",
+    "tags": [
+      "紅葉"
+    ]
+  },
+  {
+    "id": "sample-favorite-07",
+    "image": "favorite-07.webp",
+    "date": "2026-04-05",
+    "alt": "淡い色の桜の花",
+    "tags": [
+      "花"
+    ]
+  },
+  {
+    "id": "sample-favorite-08",
+    "image": "favorite-08.webp",
+    "date": "2026-06-13",
+    "alt": "湯けむりの中を流れる白い湯",
+    "tags": [
+      "水辺"
+    ]
+  },
+  {
+    "id": "sample-favorite-09",
+    "image": "favorite-09.webp",
+    "date": "2026-08-30",
+    "alt": "雲の下に広がる緑の丘",
+    "tags": [
+      "山",
+      "空"
+    ]
+  },
+  {
+    "id": "sample-favorite-10",
+    "image": "favorite-10.webp",
+    "date": "2019-08-10",
+    "alt": "水面に映り込む鮮やかな緑",
+    "tags": [
+      "森",
+      "水辺"
+    ]
+  },
+  {
+    "id": "sample-favorite-11",
+    "image": "favorite-11.webp",
+    "date": "2019-09-16",
+    "alt": "薄い霧に包まれた桟橋と山",
+    "tags": [
+      "山",
+      "水辺"
+    ]
+  },
+  {
+    "id": "sample-favorite-12",
+    "image": "favorite-12.webp",
+    "date": "2019-09-16",
+    "alt": "山並みの下を流れる青い川",
+    "tags": [
+      "山",
+      "水辺"
+    ]
+  },
+  {
+    "id": "sample-favorite-13",
+    "image": "favorite-13.webp",
+    "date": "",
+    "alt": "青空の下の海岸と防波堤",
+    "tags": [
+      "海",
+      "空"
+    ]
+  },
+  {
+    "id": "sample-favorite-14",
+    "image": "favorite-14.webp",
+    "date": "",
+    "alt": "広場に立つ大きな木",
+    "tags": [
+      "緑",
+      "空"
+    ]
+  },
+  {
+    "id": "sample-favorite-15",
+    "image": "favorite-15.webp",
+    "date": "2026-01-02",
+    "alt": "雪の積もった木々と建物",
+    "tags": [
+      "雪",
+      "森"
+    ]
+  },
+  {
+    "id": "sample-favorite-16",
+    "image": "favorite-16.webp",
+    "date": "2023-12-02",
+    "alt": "ライトアップされた建物を見上げた風景",
+    "tags": [
+      "建築"
+    ]
+  },
+  {
+    "id": "sample-favorite-17",
+    "image": "favorite-17.webp",
+    "date": "2024-11-23",
+    "alt": "SHIMANAMIの文字と橋",
+    "tags": [
+      "建築",
+      "空"
+    ]
+  },
+  {
+    "id": "sample-favorite-18",
+    "image": "favorite-18.webp",
+    "date": "2025-09-21",
+    "alt": "岩と木々の向こうに見える山並み",
+    "tags": [
+      "山",
+      "空"
+    ]
+  }
+]
