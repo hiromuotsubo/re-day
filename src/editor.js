@@ -96,7 +96,6 @@ export function openEditor({ item, trigger, onSaved, onCancel }) {
         createdAt: item?.createdAt || now, updatedAt: now,
       }
       await saveMemory(record, item)
-      setBusy(false)
       await onSaved(record.id)
       notify(item ? '変更を保存しました。' : '思い出を追加しました。')
     } catch (error) { errorText.textContent = storageMessage(error) }

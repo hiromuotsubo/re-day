@@ -27,7 +27,7 @@ let currentDraw
 export function dailyPicks(records, today = localDate()) {
   let saved = currentDraw
   try { saved = JSON.parse(localStorage.getItem(dailyKey)) || currentDraw } catch { /* Storage can be disabled. */ }
-  const previous = Array.isArray(saved?.ids) ? saved.ids : []
+  const previous = Array.isArray(saved?.ids) ? [...new Set(saved.ids)] : []
   const picked = []
   for (const source of ['personal', 'sample']) {
     const pool = records.filter(item => item.source === source)
