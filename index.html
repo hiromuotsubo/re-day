@@ -8,9 +8,54 @@
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
     <title>re:day｜思い出のアルバム</title>
   </head>
-  <body>
-    <header><a href="#top" class="brand">re:day</a></header>
-    <main id="top"><h1>今日の2枚</h1></main>
+  <body id="top">
+    <a class="skip" href="#album">思い出の一覧へ</a>
+    <header class="header">
+      <div class="header-inner wrap">
+        <a class="brand" href="#top" aria-label="re:day ホーム">re:day</a>
+        <nav aria-label="メインメニュー">
+          <a href="#album" class="nav-link album-link">すべての思い出</a>
+          <button id="guide" class="nav-link help-link">使い方</button>
+          <button id="settings" class="nav-icon" aria-label="設定" title="設定"><svg class="icon"><use href="./icons.svg#settings"/></svg></button>
+          <button id="add" class="nav-add"><svg class="icon"><use href="./icons.svg#plus"/></svg>写真を追加</button>
+        </nav>
+      </div>
+    </header>
+    <main class="wrap">
+      <section class="hero" aria-labelledby="daily-title">
+        <div class="intro">
+          <div class="today-date"><svg class="icon"><use href="./icons.svg#calendar"/></svg><time id="today-date"></time></div>
+          <h1 id="daily-title">今日の2枚</h1>
+          <p class="intro-copy">今日、あなたに届いた<br>2枚の思い出。</p>
+          <p class="note">日付が変わると、新しい2枚に出会えます。</p>
+        </div>
+        <div id="daily" class="daily" aria-label="今日の思い出"><p class="note">写真を読み込んでいます…</p></div>
+      </section>
+      <section id="album" class="album" aria-labelledby="album-title">
+        <div class="section-head">
+          <div class="section-title"><h2 id="album-title">すべての思い出</h2><span id="count" role="status"></span></div>
+          <div class="mode-switch" role="group" aria-label="表示方法">
+            <button data-mode="float" aria-pressed="true"><svg class="icon"><use href="./icons.svg#stack"/></svg>眺める</button>
+            <button data-mode="gallery" aria-pressed="false"><svg class="icon"><use href="./icons.svg#grid"/></svg>一覧</button>
+          </div>
+        </div>
+        <div class="toolbar">
+          <label class="select-field"><span>写真の種類</span><select id="source"><option value="all">すべて</option><option value="personal">自分の写真</option><option value="sample">サンプル</option></select></label>
+          <label class="select-field"><span>タグ</span><select id="tag"><option value="">すべて</option></select></label>
+          <label class="select-field"><span>並び順</span><select id="sort"><option value="random">ランダム</option><option value="new">新しい日付順</option><option value="old">古い日付順</option></select></label>
+          <button id="shuffle" class="text-action"><svg class="icon"><use href="./icons.svg#shuffle"/></svg>再シャッフル</button>
+        </div>
+        <div id="collection" class="collection float" aria-label="思い出の写真"></div>
+        <div id="empty" class="empty" hidden><svg class="icon"><use href="./icons.svg#photo"/></svg><p></p><button class="secondary"></button></div>
+      </section>
+    </main>
+    <footer class="wrap footer"><a class="brand" href="#top">re:day</a><button id="footer-settings">設定・データ管理</button><a href="#top" aria-label="ページの先頭へ"><svg class="icon"><use href="./icons.svg#up"/></svg></a></footer>
+    <dialog id="dialog" aria-labelledby="dialog-title">
+      <div class="dialog-bar"><h2 id="dialog-title" tabindex="-1"></h2><button class="close" aria-label="閉じる"><svg class="icon"><use href="./icons.svg#close"/></svg></button></div>
+      <div id="dialog-body"></div>
+    </dialog>
+    <div id="notice" class="notice" role="status"></div>
+    <noscript>re:dayを利用するには、ブラウザのJavaScriptを有効にしてください。</noscript>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
