@@ -3,8 +3,52 @@ import { dailyPicks, filteredMemories, localDate, samples, shuffled } from './me
 import { revealMemories } from './animations.js'
 import { $, dateLabel, element, notify, photoImage, printCard, showDialog, template } from './ui.js'
 
+import { allPersonal } from './storage.js'
+import { confirmDeletion, openEditor } from './editor.js'
+
 let records = [...samples]
-let order = shuffled(records.map(item => item.id))
+const changes = typeof BroadcastChannel === 'function' ? new BroadcastChannel('re-day:changes') : null
+let refreshVersion = 0
+
+async function refresh() {
+  const version = ++refreshVersion
+  const stored = await allPersonal()
+  if (version !== refreshVersion) return
+  const old = records.filter(item => item.source === 'personal')
+  const existing = new Map(old.map(item => [item.id, item]))
+  const personal = stored.map(item => {
+    const previous = existing.get(item.id)
+    if (previous?.updatedAt === item.updatedAt) return previous
+    return { ...item, blob: item.image, image: URL.createObjectURL(item.image) }
+  })
+  records = [...samples, ...personal]
+  const ids = new Set(records.map(item => item.id))
+  order = order.filter(id => ids.has(id))
+  const known = new Set(order)
+  order.push(...shuffled(records.filter(item => !known.has(item.id)).map(item => item.id)))
+  refreshTags()
+  renderDaily()
+  renderCollection()
+  const stillInUse = new Set(personal)
+  old.filter(item => !stillInUse.has(item)).forEach(item => URL.revokeObjectURL(item.image))
+}
+
+async function updateAlbum() {
+  changes?.postMessage('changed')
+  await refresh()
+}
+
+changes?.addEventListener('message', () => refresh().catch(() => notify('アルバムを更新できません。ページを再読み込みしてください。')))
+
+function savedDetail(id) {
+  return updateAlbum().then(() => {
+    const item = records.find(record => record.id === id)
+    if (item) openDetail(item)
+  })
+}
+
+$('#add').onclick = event => openEditor({ trigger: event.currentTarget, onSaved: savedDetail })
+let order = []
 let mode = 'float'
 let visible = []
 function openDetail(item, trigger) {
@@ -19,6 +63,16 @@ function openDetail(item, trigger) {
     fields.append(element('dt', '', label), element('dd', '', value || '未設定'))
   }
   info.append(kind, date, fields)
+  if (item.source === 'personal') {
+    const actions = element('div', 'actions')
+    const edit = element('button', 'secondary', '編集')
+    const remove = element('button', 'delete-link', '削除')
+    const reopen = () => openDetail(records.find(record => record.id === item.id) || item)
+    edit.onclick = () => openEditor({ item, onSaved: savedDetail, onCancel: reopen })
+    remove.onclick = () => confirmDeletion(item, updateAlbum, reopen)
+    actions.append(edit, remove)
+    info.append(actions)
+  }
   panel.append(image, info)
   const region = trigger?.closest('#daily') ? '#daily' : '#collection'
   const returnFocus = () => $(region)?.querySelector('[data-id="' + CSS.escape(item.id) + '"].print') || $('#add')
@@ -116,7 +170,14 @@ function scheduleDaily() {
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden && $('#today-date').dateTime !== localDate()) { renderDaily(); scheduleDaily() }
 })
-refreshTags()
-renderDaily()
-renderCollection()
-scheduleDaily()
+async function start() {
+  try { await refresh() }
+  catch {
+    refreshTags()
+    renderDaily()
+    renderCollection()
+    notify('ブラウザの保存領域を開けませんでした。サンプル写真を表示します。')
+  }
+  scheduleDaily()
+}
+start()

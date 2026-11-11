@@ -12,6 +12,9 @@ export function revealMemories(nodes) {
   revealObserver?.disconnect()
   if (!revealObserver || matchMedia('(prefers-reduced-motion: reduce)').matches) return
   for (const node of nodes) {
+    // 最初の画面内にすでに見えているチェキは、そのまま表示する。
+    const rect = node.getBoundingClientRect()
+    if (rect.top < innerHeight && rect.bottom > 0) seen.add(node.dataset.id)
     if (!seen.has(node.dataset.id)) {
       node.classList.add('reveal')
       revealObserver.observe(node)
