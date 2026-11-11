@@ -5,6 +5,7 @@ import { $, dateLabel, element, notify, photoImage, printCard, showDialog, templ
 
 import { allPersonal } from './storage.js'
 import { confirmDeletion, openEditor } from './editor.js'
+import { openSettings } from './settings.js'
 
 let records = [...samples]
 const changes = typeof BroadcastChannel === 'function' ? new BroadcastChannel('re-day:changes') : null
@@ -151,6 +152,10 @@ $('#shuffle').addEventListener('click', () => {
   renderCollection()
   notify('思い出の順番をシャッフルしました。')
 })
+
+for (const button of [$('#settings'), $('#footer-settings')]) {
+  button.onclick = () => openSettings(button, updateAlbum)
+}
 
 $('#guide').addEventListener('click', () => {
   showDialog('使い方', template(`<div class="prose">

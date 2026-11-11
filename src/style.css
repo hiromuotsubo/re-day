@@ -233,3 +233,10 @@ dialog::backdrop { background: #26252280; }
   .editor, .confirm-panel, .settings-panel { padding: 16px 20px; }
   .form-fields input, .form-fields textarea { font-size: 16px; }
 }
+.settings-panel section + section { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line); }
+.settings-panel p + p { margin-top: 7px; }
+.settings-panel .secondary { margin-top: 12px; }
+.settings-panel .storage-info { font-size: 12px; margin-top: 8px; }
+.settings-panel .persist { font-size: 12px; min-height: 34px; padding: 6px 10px; }
+.settings-panel .result:not(:empty) { margin-top: 18px; padding: 10px 12px; background: var(--background); }
+.settings-panel .error { color: #953d2c; }
