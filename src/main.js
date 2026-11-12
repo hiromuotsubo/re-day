@@ -1,5 +1,5 @@
 import './style.css'
-import { dailyPicks, filteredMemories, localDate, samples, shuffled } from './memories.js'
+import { dailyPicks, filteredMemories, localDate, samples, seasonForDate, shuffled } from './memories.js'
 import { revealMemories } from './animations.js'
 import { $, dateLabel, element, notify, printCard, showDialog, template } from './ui.js'
 
@@ -114,13 +114,21 @@ function openDetail(item, trigger) {
   }
 }
 
+function memoryFrame(item, content) {
+  const frame = element('div', 'memory')
+  const season = seasonForDate(item.date)
+  if (season) frame.dataset.season = season
+  frame.append(content)
+  return frame
+}
+
 function renderDaily() {
   const today = localDate()
   const dateNode = $('#today-date')
   dateNode.dateTime = today
   dateNode.textContent = dateLabel(today) + '　' + new Intl.DateTimeFormat('ja', { weekday: 'short' }).format(new Date()) + '曜日'
   const picks = dailyPicks(records, today)
-  $('#daily').replaceChildren(...picks.map(item => printCard(item, openDetail)))
+  $('#daily').replaceChildren(...picks.map(item => memoryFrame(item, printCard(item, openDetail))))
   if (!picks.length) $('#daily').append(element('p', 'note', '最初の写真を追加すると、ここに思い出が届きます。'))
 }
 
@@ -141,11 +149,10 @@ function renderCollection() {
   const collection = $('#collection')
   collection.className = 'collection ' + mode
   collection.replaceChildren(...visible.map(item => {
-    const wrapper = element('div', 'memory')
-    wrapper.dataset.id = item.id
     const mount = element('div', 'mount')
     mount.append(printCard(item, openDetail, true))
-    wrapper.append(mount)
+    const wrapper = memoryFrame(item, mount)
+    wrapper.dataset.id = item.id
     return wrapper
   }))
   revealMemories(mode === 'float' ? collection.children : [])

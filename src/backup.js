@@ -1,4 +1,5 @@
 import { BlobReader, BlobWriter, TextReader, TextWriter, ZipReader, ZipWriter } from '@zip.js/zip.js/lib/zip-core-external.js'
+import { validDate } from './memories.js'
 import { readablePhoto } from './photos.js'
 
 const extensions = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif', 'image/avif': 'avif' }
@@ -17,13 +18,6 @@ export async function createBackup(records) {
   }
   await writer.add('album.json', new TextReader(JSON.stringify({ format, version: 1, memories }, null, 2)))
   return writer.close()
-}
-
-function validDate(value) {
-  if (value === '') return true
-  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
-  const day = new Date(value + 'T00:00:00Z')
-  return Number.isFinite(day.getTime()) && day.toISOString().slice(0, 10) === value
 }
 
 function validTimestamp(value) {

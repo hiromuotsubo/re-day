@@ -12,6 +12,22 @@ export function localDate(now = new Date()) {
   return [now.getFullYear(), pad(now.getMonth() + 1), pad(now.getDate())].join('-')
 }
 
+export function validDate(value) {
+  if (value === '') return true
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const day = new Date(value + 'T00:00:00Z')
+  return Number.isFinite(day.getTime()) && day.toISOString().slice(0, 10) === value
+}
+
+export function seasonForDate(date) {
+  if (!date || !validDate(date)) return ''
+  const month = Number(date.slice(5, 7))
+  if (month >= 3 && month <= 5) return 'spring'
+  if (month >= 6 && month <= 8) return 'summer'
+  if (month >= 9 && month <= 11) return 'autumn'
+  return 'winter'
+}
+
 export function shuffled(items) {
   const result = [...items]
   for (let end = result.length - 1; end > 0; end--) {

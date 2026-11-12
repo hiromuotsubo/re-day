@@ -74,6 +74,8 @@ HTML、CSS、Vanilla JavaScript、Viteを使用しています。ZIP処理には
 | 変数 | 変更する内容 |
 | --- | --- |
 | `--background`, `--surface`, `--ink`, `--muted`, `--line`, `--accent` | 背景、紙、文字、境界線、アクセント色 |
+| `--spring`, `--summer`, `--autumn`, `--winter` | 撮影月に応じた色。3〜5月が春、6〜8月が夏、9〜11月が秋、12〜2月が冬 |
+| `--season-opacity`, `--season-size`, `--season-core` | 季節色の濃さ（0.56）、チェキに対する広がり（190%）、透明に向かい始める位置（35%） |
 | `--content`, `--gutter` | 最大幅と左右の余白 |
 | `--float-width`, `--float-span`, `--float-overlap`, `--gallery-gap` | チェキの幅（168〜380px）、左右の配置幅（チェキ幅の2.65倍）、縦方向の重なり、一覧の間隔 |
 | `--print-shadow`, `--hover-time` | 影とホバーの時間 |
