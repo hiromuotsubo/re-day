@@ -3,7 +3,6 @@ import { deleteMemory, saveMemory, storageMessage } from './storage.js'
 import { readablePhoto } from './photos.js'
 
 export function openEditor({ item, trigger, onSaved, onCancel }) {
-  if (item && item.source !== 'personal') return
   const form = template(`<form class="editor">
     <div class="upload-area">
       <input id="image-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" class="visually-hidden">
@@ -42,7 +41,7 @@ export function openEditor({ item, trigger, onSaved, onCancel }) {
     drop.hidden = Boolean(imageUrl)
     replace.hidden = !imageUrl
     fileInput.tabIndex = imageUrl ? -1 : 0
-    save.disabled = !blob || checking || saving
+    save.disabled = !imageUrl || checking || saving
   }
   async function selectFile(file) {
     if (!file || saving) return
@@ -81,18 +80,24 @@ export function openEditor({ item, trigger, onSaved, onCancel }) {
   form.querySelector('.cancel').onclick = () => onCancel ? onCancel() : closeDialog()
   form.onsubmit = async event => {
     event.preventDefault()
-    if (saving || checking || !blob) return
+    if (saving || checking || !imageUrl) return
     saving = true
     setBusy(true)
     form.inert = true
     save.textContent = '保存中…'
     try {
+      if (!blob) {
+        const response = await fetch(item.image)
+        if (!response.ok) throw new Error('写真を読み込めませんでした。もう一度お試しください。')
+        blob = await response.blob()
+      }
       const now = new Date().toISOString()
       const record = {
         id: item?.id || 'personal-' + crypto.randomUUID(),
-        source: 'personal', image: blob, date: fields.date.value,
+        source: item?.source || 'personal', image: blob, date: fields.date.value,
         location: fields.location.value.trim(), comment: fields.comment.value.trim(),
         tags: [...new Set(fields.tags.value.split(/[、,，]/u).map(tag => tag.trim()).filter(Boolean))],
+        alt: tempUrl ? '' : item?.alt || '',
         createdAt: item?.createdAt || now, updatedAt: now,
       }
       await saveMemory(record, item)
@@ -109,7 +114,6 @@ export function openEditor({ item, trigger, onSaved, onCancel }) {
 }
 
 export function confirmDeletion(item, onDeleted, onCancel) {
-  if (item.source !== 'personal') return
   const panel = template(`<div class="confirm-panel"><p>削除した写真は元に戻せません。</p>
     <p class="error" role="alert"></p><div class="actions"><button class="secondary">キャンセル</button><button class="danger">削除する</button></div></div>`)
   panel.querySelector('.secondary').onclick = onCancel

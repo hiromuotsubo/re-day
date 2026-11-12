@@ -18,12 +18,12 @@ function database() {
   return connection
 }
 
-export async function allPersonal() {
+export async function storedChanges() {
   const db = await database()
   return new Promise((resolve, reject) => {
     const request = db.transaction(storeName).objectStore(storeName).getAll()
     request.onsuccess = () => resolve(request.result.map(record => {
-      if (record.image instanceof Blob) return record
+      if (record.deleted || record.image instanceof Blob) return record
       return { ...record, image: new Blob([record.image], { type: record.imageType }) }
     }))
     request.onerror = () => reject(request.error)
@@ -51,7 +51,7 @@ async function withWritableImages(records, operation) {
       if (!['UnknownError', 'DataCloneError'].includes(error?.name)) throw error
     }
   }
-  const converted = await Promise.all(records.map(async record => ({
+  const converted = await Promise.all(records.map(async record => record.deleted ? record : ({
     ...record, image: await record.image.arrayBuffer(), imageType: record.image.type,
   })))
   const result = await operation(converted)
@@ -64,7 +64,7 @@ export function saveMemory(memory, previous) {
     if (!previous) { store.add(record); return }
     const request = store.get(record.id)
     request.onsuccess = () => {
-      if (request.result?.updatedAt !== previous.updatedAt) {
+      if ((request.result?.updatedAt ?? '') !== previous.updatedAt) {
         abort(new Error('この写真は別の画面で変更されました。詳細を開き直してください。'))
       } else { store.put(record) }
     }
@@ -75,8 +75,10 @@ export function deleteMemory(record) {
   return write((store, abort) => {
     const request = store.get(record.id)
     request.onsuccess = () => {
-      if (request.result?.updatedAt !== record.updatedAt) {
+      if ((request.result?.updatedAt ?? '') !== record.updatedAt) {
         abort(new Error('この写真は別の画面で変更されました。詳細を開き直してください。'))
+      } else if (record.source === 'sample') {
+        store.put({ id: record.id, deleted: true, updatedAt: new Date().toISOString() })
       } else { store.delete(record.id) }
     }
   })

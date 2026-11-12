@@ -1,5 +1,5 @@
 import { localDate } from './memories.js'
-import { allPersonal, restoreMissing, storageMessage } from './storage.js'
+import { storedChanges, restoreMissing, storageMessage } from './storage.js'
 import { setBusy, showDialog, template } from './ui.js'
 
 export function openSettings(trigger, onRestore) {
@@ -9,7 +9,7 @@ export function openSettings(trigger, onRestore) {
       <p>ブラウザのデータを消去すると写真も失われます。共有端末では、同じブラウザプロファイルを使う人が写真を閲覧できます。</p>
       <div class="storage-controls"><p class="storage-info"></p><button class="secondary persist" hidden>永続ストレージをリクエスト</button></div>
     </section>
-    <section><h3>バックアップ</h3><p>自分の写真と登録情報をZIPファイルにまとめます。個人の写真が含まれるため、保管場所にご注意ください。</p>
+    <section><h3>バックアップ</h3><p>自分の写真と、サンプルの編集・削除内容をZIPファイルにまとめます。個人の写真が含まれるため、保管場所にご注意ください。</p>
       <button class="secondary export"><svg class="icon"><use href="./icons.svg#download"/></svg>ZIPに書き出す</button></section>
     <section><h3>復元</h3><p>re:dayで書き出したZIPを選びます。同じIDの写真はスキップし、新しい写真だけを追加します。</p>
       <input type="file" class="backup-file" accept=".zip,application/zip" hidden>
@@ -56,8 +56,8 @@ export function openSettings(trigger, onRestore) {
     return allowed ? '永続ストレージが有効になりました。' : 'ブラウザは永続ストレージを許可しませんでした。ZIPのバックアップをご利用ください。'
   })
   panel.querySelector('.export').onclick = () => run('バックアップを作成しています…', async () => {
-    const memories = await allPersonal()
-    if (!memories.length) return '書き出す写真がありません。先に自分の写真を追加してください。'
+    const memories = await storedChanges()
+    if (!memories.length) return '書き出す写真がありません。写真を追加するか、サンプルを変更してください。'
     const { createBackup } = await import('./backup.js')
     const url = URL.createObjectURL(await createBackup(memories))
     const link = document.createElement('a')

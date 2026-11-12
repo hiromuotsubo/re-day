@@ -2,7 +2,7 @@ import { dailyPicks, filteredMemories, localDate, samples, seasonForDate, shuffl
 import { observeMemories } from './animations.js'
 import { $, dateLabel, element, notify, printCard, showDialog, template } from './ui.js'
 
-import { allPersonal } from './storage.js'
+import { storedChanges } from './storage.js'
 import { confirmDeletion, openEditor } from './editor.js'
 import { openSettings } from './settings.js'
 
@@ -12,16 +12,17 @@ let refreshVersion = 0
 
 async function refresh() {
   const version = ++refreshVersion
-  const stored = await allPersonal()
+  const stored = await storedChanges()
   if (version !== refreshVersion) return
-  const old = records.filter(item => item.source === 'personal')
+  const old = records.filter(item => item.blob)
   const existing = new Map(old.map(item => [item.id, item]))
-  const personal = stored.map(item => {
+  const modified = stored.filter(item => !item.deleted).map(item => {
     const previous = existing.get(item.id)
     if (previous?.updatedAt === item.updatedAt) return previous
     return { ...item, blob: item.image, image: URL.createObjectURL(item.image) }
   })
-  records = [...samples, ...personal]
+  const changedIds = new Set(stored.map(item => item.id))
+  records = [...samples.filter(item => !changedIds.has(item.id)), ...modified]
   const ids = new Set(records.map(item => item.id))
   order = order.filter(id => ids.has(id))
   const known = new Set(order)
@@ -29,7 +30,7 @@ async function refresh() {
   refreshTags()
   renderDaily()
   renderCollection()
-  const stillInUse = new Set(personal)
+  const stillInUse = new Set(modified)
   old.filter(item => !stillInUse.has(item)).forEach(item => URL.revokeObjectURL(item.image))
 }
 
@@ -72,16 +73,14 @@ function openDetail(item, trigger) {
   for (const [label, value] of [['場所', item.location], ['コメント', item.comment], ['タグ', item.tags.join('　')]]) {
     fields.append(element('dt', '', label), element('dd', '', value || '未設定'))
   }
-  if (item.source === 'personal') {
-    const actions = element('div', 'actions')
-    const edit = element('button', 'secondary', '編集')
-    const remove = element('button', 'delete-link', '削除')
-    const reopen = () => openDetail(records.find(record => record.id === item.id) || item)
-    edit.onclick = () => openEditor({ item, onSaved: savedDetail, onCancel: reopen })
-    remove.onclick = () => confirmDeletion(item, updateAlbum, reopen)
-    actions.append(edit, remove)
-    back.append(actions)
-  }
+  const actions = element('div', 'actions')
+  const edit = element('button', 'secondary', '編集')
+  const remove = element('button', 'delete-link', '削除')
+  const reopen = () => openDetail(records.find(record => record.id === item.id) || item)
+  edit.onclick = () => openEditor({ item, onSaved: savedDetail, onCancel: reopen })
+  remove.onclick = () => confirmDeletion(item, updateAlbum, reopen)
+  actions.append(edit, remove)
+  back.append(actions)
 
   function showBack(isBack) {
     card.classList.toggle('is-back', isBack)
@@ -201,7 +200,7 @@ $('#guide').addEventListener('click', () => {
   showDialog('使い方', template(`<div class="prose">
     <section><h3>毎日、2枚の思い出に出会う</h3><p>「今日の2枚」は毎日変わります。登録した写真を優先して、足りない分はサンプルから選びます。</p></section>
     <section><h3>アルバムを眺める</h3><p>スクロールするとチェキが順番に現れます。「一覧」に切り替えたり、タグや撮影日で写真を探したりできます。</p></section>
-    <section><h3>自分の写真を残す</h3><p>「写真を追加」で1枚選び、日付や言葉を添えて保存します。チェキを押すと裏返り、場所・コメント・タグが読めます。「写真を見る」で表に戻せます。自分の写真は裏面から編集・削除できます。</p></section>
+    <section><h3>自分の写真を残す</h3><p>「写真を追加」で1枚選び、日付や言葉を添えて保存します。チェキを押すと裏返り、場所・コメント・タグが読めます。「写真を見る」で表に戻せます。サンプルを含め、裏面から編集・削除できます。</p></section>
     <section><h3>別の端末へ移す</h3><p>設定から写真をZIPで書き出し、移行先のブラウザで復元してください。</p></section></div>`))
 })
 
