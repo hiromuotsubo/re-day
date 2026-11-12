@@ -1,6 +1,6 @@
 import './style.css'
 import { dailyPicks, filteredMemories, localDate, samples, seasonForDate, shuffled } from './memories.js'
-import { revealMemories } from './animations.js'
+import { observeMemories } from './animations.js'
 import { $, dateLabel, element, notify, printCard, showDialog, template } from './ui.js'
 
 import { allPersonal } from './storage.js'
@@ -155,7 +155,7 @@ function renderCollection() {
     wrapper.dataset.id = item.id
     return wrapper
   }))
-  revealMemories(mode === 'float' ? collection.children : [])
+  observeMemories(mode === 'float' ? collection.children : [])
   $('#count').textContent = visible.length + ' 枚'
   $('#shuffle').disabled = sort !== 'random' || visible.length < 2
   $('#empty').hidden = visible.length > 0
