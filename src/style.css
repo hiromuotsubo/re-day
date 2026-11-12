@@ -164,7 +164,7 @@ main { isolation: isolate; overflow: clip; }
 }
 .memory.reveal .mount, .float .memory.reveal::before { opacity: 0; pointer-events: none; }
 .memory.revealed .mount, .float .memory.revealed::before {
-  animation: float-in var(--reveal-time) var(--ease-out) var(--reveal-delay, 0ms) backwards;
+  animation: float-in var(--reveal-time) var(--ease-out) backwards;
 }
 .memory:focus-within .mount { opacity: 1; animation: none; }
 @keyframes float-in {

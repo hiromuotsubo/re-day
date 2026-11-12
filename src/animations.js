@@ -96,7 +96,6 @@ function stopTilt() {
 }
 
 const observer = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
-  let delay = 0
   for (const { target, isIntersecting, intersectionRatio } of entries) {
     if (!target.isConnected) continue
     if (isIntersecting && !reducedMotion.matches) {
@@ -108,10 +107,7 @@ const observer = 'IntersectionObserver' in window ? new IntersectionObserver(ent
 
     if (intersectionRatio < visibleFraction || seen.has(target.dataset.id)) continue
     seen.add(target.dataset.id)
-    if (target.classList.replace('reveal', 'revealed')) {
-      target.style.setProperty('--reveal-delay', delay + 'ms')
-      delay = Math.min(delay + 90, 180)
-    }
+    target.classList.replace('reveal', 'revealed')
   }
   if (!visible.size) stopTilt()
 }, { threshold: [0, visibleFraction] }) : null
