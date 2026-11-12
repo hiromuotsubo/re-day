@@ -88,7 +88,11 @@ function openDetail(item, trigger) {
     back.inert = !isBack
     turn.querySelector('span').textContent = isBack ? '写真を見る' : '裏面を見る'
   }
-  turn.onclick = () => showBack(!front.inert)
+  panel.onclick = event => {
+    if (event.target.closest('.actions')) return
+    if (card.contains(event.target) && !window.getSelection()?.isCollapsed) return
+    if (card.contains(event.target) || turn.contains(event.target)) showBack(!front.inert)
+  }
   const origin = trigger?.getBoundingClientRect()
   const region = trigger?.closest('#daily') ? '#daily' : '#collection'
   const returnFocus = () => $(region)?.querySelector('[data-id="' + CSS.escape(item.id) + '"].print') || $('#add')
@@ -200,7 +204,7 @@ $('#guide').addEventListener('click', () => {
   showDialog('使い方', template(`<div class="prose">
     <section><h3>毎日、2枚の思い出に出会う</h3><p>「今日の2枚」は毎日変わります。登録した写真を優先して、足りない分はサンプルから選びます。</p></section>
     <section><h3>アルバムを眺める</h3><p>スクロールするとチェキが順番に現れます。「一覧」に切り替えたり、タグや撮影日で写真を探したりできます。</p></section>
-    <section><h3>自分の写真を残す</h3><p>「写真を追加」で1枚選び、日付や言葉を添えて保存します。チェキを押すと裏返り、場所・コメント・タグが読めます。「写真を見る」で表に戻せます。サンプルを含め、裏面から編集・削除できます。</p></section>
+    <section><h3>自分の写真を残す</h3><p>「写真を追加」で1枚選び、日付や言葉を添えて保存します。チェキを押すと裏返り、場所・コメント・タグが読めます。裏面をもう一度押すと写真に戻ります。サンプルを含め、裏面から編集・削除できます。</p></section>
     <section><h3>別の端末へ移す</h3><p>設定から写真をZIPで書き出し、移行先のブラウザで復元してください。</p></section></div>`))
 })
 

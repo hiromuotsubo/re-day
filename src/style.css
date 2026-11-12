@@ -49,10 +49,10 @@ body {
   --float-overlap: calc(var(--float-width) * .18);
   --gallery-gap: clamp(16px, 3vw, 44px);
   --print-shadow: 0 2px 4px #34291705, 0 8px 20px -8px #34291726;
-  --reveal-time: 600ms;
-  --reveal-rise: 24px;
+  --reveal-time: 1600ms;
+  --reveal-rise: 32px;
   --hover-time: 200ms;
-  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --reveal-ease: cubic-bezier(.32, .08, .25, 1);
   --serif: "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif;
   --latin: Inter, "Helvetica Neue", Arial, sans-serif;
 }
@@ -167,7 +167,7 @@ main { isolation: isolate; overflow: clip; }
 @media (prefers-reduced-motion: no-preference) {
   .float .reveal .mount, .float .reveal::before { opacity: 0; pointer-events: none; }
   .float .revealed .mount, .float .revealed::before {
-    animation: float-in var(--reveal-time) var(--ease-out);
+    animation: float-in var(--reveal-time) var(--reveal-ease);
   }
 }
 @keyframes float-in {
@@ -271,7 +271,7 @@ dialog::backdrop { background: #26252280; }
 .flip-dialog .close { color: inherit; }
 .flip-dialog .close:hover, .turn-card:hover { background: rgb(255 255 255 / .17); }
 .card-stage { perspective: 1300px; transform-origin: top left; }
-.turning-card { position: relative; aspect-ratio: .89; max-height: calc(100dvh - 120px); transform-style: preserve-3d; transition: transform 680ms cubic-bezier(.38,.06,.22,1); }
+.turning-card { cursor: pointer; position: relative; aspect-ratio: .89; max-height: calc(100dvh - 120px); transform-style: preserve-3d; transition: transform 680ms cubic-bezier(.38,.06,.22,1); }
 .turning-card.is-back { transform: rotateY(180deg); }
 .turning-card > * { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 .turning-card > .print { display: flex; flex-direction: column; }
