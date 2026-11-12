@@ -75,7 +75,7 @@ HTML、CSS、Vanilla JavaScript、Viteを使用しています。ZIP処理には
 | --- | --- |
 | `--background`, `--surface`, `--ink`, `--muted`, `--line`, `--accent` | 背景、紙、文字、境界線、アクセント色 |
 | `--content`, `--gutter` | 最大幅と左右の余白 |
-| `--float-width`, `--float-overlap`, `--gallery-gap` | チェキの幅、左右交互の縦方向の重なり、一覧の間隔 |
+| `--float-width`, `--float-span`, `--float-overlap`, `--gallery-gap` | チェキの幅（168〜380px）、左右の配置幅（チェキ幅の2.65倍）、縦方向の重なり、一覧の間隔 |
 | `--print-shadow`, `--hover-time` | 影とホバーの時間 |
 | `--reveal-time`, `--reveal-rise`, `--ease-out` | 登場アニメーションの時間、浮かび上がる距離、イージング |
 

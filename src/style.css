@@ -36,8 +36,9 @@ body {
 :root {
   --content: 1280px;
   --gutter: clamp(20px, 5.55vw, 80px);
-  --float-width: 272px;
-  --float-overlap: 50px;
+  --float-width: clamp(168px, max(24vw, 112px + 13vw), 380px);
+  --float-span: 2.65;
+  --float-overlap: calc(var(--float-width) * .18);
   --gallery-gap: clamp(16px, 3vw, 44px);
   --print-shadow: 0 2px 4px #34291705, 0 8px 20px -8px #34291726;
   --reveal-time: 1200ms;
@@ -95,7 +96,13 @@ h1 { font-size: clamp(44px, 4.1vw, 64px); line-height: 1.3; letter-spacing: .015
 .print-image { display: grid; place-items: center; width: 100%; aspect-ratio: 1; overflow: hidden; background: #eeede8; color: var(--muted); font-size: 12px; }
 .print-image img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .print-date { display: grid; place-items: center; min-height: 48px; font: 400 13px/1.4 var(--latin); letter-spacing: .055em; }
-.daily .print-date { min-height: clamp(45px, 4vw, 58px); font-size: 14px; }
+.daily .print, .float .print { padding: 4% 4% 0; }
+.daily .print-date, .float .print-date {
+  width: 100%;
+  min-height: 30px;
+  aspect-ratio: 6 / 1;
+  font-size: clamp(11px, 1vw, 15px);
+}
 .print-date.unknown { font-family: inherit; font-size: 12px; color: var(--muted); }
 @media (hover:hover) { button.print:hover { transform: translateY(-3px); box-shadow: 0 8px 22px -5px #34291733; } }
 
@@ -122,8 +129,8 @@ h1 { font-size: clamp(44px, 4.1vw, 64px); line-height: 1.3; letter-spacing: .015
 
 /* Float view */
 .collection { margin-top: clamp(32px, 3.5vw, 54px); }
-.float { max-width: 810px; margin-inline: auto; }
-.float .memory { width: min(42%, var(--float-width)); }
+.float { width: min(100%, calc(var(--float-width) * var(--float-span))); margin-inline: auto; }
+.float .memory { width: min(100%, var(--float-width)); }
 .float .memory:nth-child(even) { margin-left: auto; }
 .float .memory + .memory { margin-top: calc(-1 * var(--float-overlap)); }
 .float .memory:nth-child(6n + 1) .mount { transform: rotate(-1.3deg); }
@@ -162,7 +169,6 @@ h1 { font-size: clamp(44px, 4.1vw, 64px); line-height: 1.3; letter-spacing: .015
   .intro .note { max-width: 19em; }
   .select-field { flex: 1; width: auto; }
   .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .float { max-width: 690px; }
 }
 @media (max-width: 720px) {
   .header-inner { height: 62px; }
@@ -178,7 +184,7 @@ h1 { font-size: clamp(44px, 4.1vw, 64px); line-height: 1.3; letter-spacing: .015
   .intro-copy br { display: none; }
   .intro .note { margin-top: 4px; max-width: unset; font-size: 12px; }
   .daily { margin-top: 22px; }
-  .daily .print-date, .print-date { min-height: 36px; font-size: 11px; }
+  .print-date { min-height: 36px; font-size: 11px; }
   .album { padding-top: 26px; }
   .section-title { gap: 8px; }
   .section-title h2 { font-size: 25px; }
@@ -188,10 +194,9 @@ h1 { font-size: clamp(44px, 4.1vw, 64px); line-height: 1.3; letter-spacing: .015
   .select-field select { font-size: 13px; padding-left: 78px; }
   .select-field::after { top: 14px; }
   .text-action { font-size: 12px; }
-  .float { --float-width: 240px; --float-overlap: 30px; max-width: 580px; }
-  .float .memory { width: min(48%, var(--float-width)); }
 }
 @media (max-width: 420px) {
+  .float { --float-overlap: -16px; }
   .section-head { align-items: flex-start; }
   .section-title { display: block; }
   .section-title h2 { font-size: 23px; }
