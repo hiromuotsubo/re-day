@@ -7,7 +7,8 @@ const format = 're-day-album'
 const options = { useWebWorkers: false, level: 0 }
 const idPattern = /^personal-[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i
 
-const sampleIds = new Set(samples.map(item => item.id))
+// Older backups may include edits or a deletion for this retired sample.
+const sampleIds = new Set([...samples.map(item => item.id), 'sample-favorite-15'])
 
 export async function createBackup(records) {
   const writer = new ZipWriter(new BlobWriter('application/zip'), options)
