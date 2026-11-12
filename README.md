@@ -76,6 +76,6 @@ HTML、CSS、Vanilla JavaScript、Viteを使用しています。ZIP処理には
 | `--content`, `--gutter` | 最大幅と左右の余白 |
 | `--float-width`, `--float-overlap`, `--gallery-gap` | チェキの幅、左右交互の縦方向の重なり、一覧の間隔 |
 | `--print-shadow`, `--hover-time` | 影とホバーの時間 |
-| `--reveal-time`, `--ease-out` | 登場アニメーションの時間とイージング |
+| `--reveal-time`, `--reveal-rise`, `--ease-out` | 登場アニメーションの時間、浮かび上がる距離、イージング |
 
-`src/animations.js` のIntersectionObserverの `rootMargin` で登場位置を調整します。初期値は画面下端から15%です。最初から画面内にあるチェキはすぐに表示し、以降は初めて見えたときだけ24px下から600msかけて現れます。OSの視差効果を減らす設定にも対応しています。
+`src/animations.js` の `visibleFraction` は、チェキがどのくらい画面に入ると演出を始めるかを指定します。初期値は1枚の25%です。「眺める」では初めてこの位置に届いたチェキが、画面幅に応じて30〜48px下から1.2秒かけて浮かび上がります。複数枚が同時に入ると少しずつ時間をずらします。一度見たチェキは表示を維持し、OSの視差効果を減らす設定ではすぐに表示します。
