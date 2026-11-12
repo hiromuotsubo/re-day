@@ -103,7 +103,7 @@ export function openEditor({ item, trigger, onSaved, onCancel }) {
   }
   drawPreview()
   showDialog(item ? '思い出を編集' : '写真を追加', form, {
-    trigger, type: 'editor-dialog',
+    trigger,
     leave: () => { revision++; if (tempUrl) URL.revokeObjectURL(tempUrl) },
   })
 }

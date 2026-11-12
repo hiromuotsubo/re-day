@@ -97,7 +97,7 @@ h1 { font-size: clamp(44px, 4.1vw, 64px); line-height: 1.3; letter-spacing: .015
 .print-date { display: grid; place-items: center; min-height: 48px; font: 400 13px/1.4 var(--latin); letter-spacing: .055em; }
 .daily .print-date { min-height: clamp(45px, 4vw, 58px); font-size: 14px; }
 .print-date.unknown { font-family: inherit; font-size: 12px; color: var(--muted); }
-@media (hover:hover) { .print:hover { transform: translateY(-3px); box-shadow: 0 8px 22px -5px #34291733; } }
+@media (hover:hover) { button.print:hover { transform: translateY(-3px); box-shadow: 0 8px 22px -5px #34291733; } }
 
 /* Album controls */
 .album { border-top: 1px solid var(--line); padding: 38px 0 64px; scroll-margin-top: 12px; }
@@ -219,24 +219,41 @@ dialog::backdrop { background: #26252280; }
 .dialog-bar h2:focus { outline: none; }
 .close { width: 36px; height: 36px; border-radius: 50%; color: var(--muted); }
 .close:hover { background: var(--background); }
-.prose, .detail-info { padding: 24px; }
+.prose { padding: 24px; }
 .prose section + section { margin-top: 24px; }
 .prose h3, .settings-panel h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
 .prose p, .settings-panel p { font-size: 14px; color: var(--muted); line-height: 1.85; }
-.detail-dialog { width: min(900px, calc(100% - 32px)); }
-.detail { display: grid; grid-template-columns: 1.4fr 1fr; }
-.detail-image { display: grid; place-items: center; background: var(--background); min-height: 240px; }
-.detail-image img { display: block; width: 100%; max-height: 65dvh; object-fit: contain; }
-.kind { font-size: 11px; letter-spacing: .08em; color: var(--muted); }
-.detail-date { margin: 8px 0 20px; font: 400 25px/1.4 var(--latin); }
-.metadata { margin: 0; }
-.metadata dt { font-size: 12px; color: var(--muted); }
-.metadata dd { margin: 2px 0 16px; font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
 @media (max-width: 650px) {
-  .detail { display: block; }
-  .detail-image { min-height: 0; }
-  .detail-image img { max-height: 42dvh; }
-  .dialog-bar, .prose, .detail-info { padding: 16px 20px; }
+  .dialog-bar, .prose { padding: 16px 20px; }
+}
+
+/* The two sides of a print */
+.print.lifted { visibility: hidden; }
+.flip-dialog { width: min(432px, calc(100% - 36px)); max-height: none; border: 0; border-radius: 0; overflow: visible; background: transparent; box-shadow: none; }
+.flip-dialog[open] { animation: none; }
+.flip-dialog::backdrop { background: rgb(35 34 31 / .72); backdrop-filter: blur(3px); }
+.flip-dialog .dialog-bar { border: 0; padding: 0 0 8px; color: #fff; }
+.flip-dialog .dialog-bar h2 { font-size: 16px; }
+.flip-dialog .close { color: inherit; }
+.flip-dialog .close:hover, .turn-card:hover { background: rgb(255 255 255 / .17); }
+.card-stage { perspective: 1300px; transform-origin: top left; }
+.turning-card { position: relative; aspect-ratio: .89; max-height: calc(100dvh - 120px); transform-style: preserve-3d; transition: transform 680ms cubic-bezier(.38,.06,.22,1); }
+.turning-card.is-back { transform: rotateY(180deg); }
+.turning-card > * { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.turning-card > .print { display: flex; flex-direction: column; }
+.turning-card .print-image { flex: 1; min-height: 0; }
+.turning-card:not(.is-back) img { object-fit: contain; }
+.paper-back { transform: rotateY(180deg); overflow: auto; overscroll-behavior: contain; padding: clamp(20px, 5vw, 34px); background: #fffefa; border: 1px solid #e4e0d8; border-radius: 2px; box-shadow: var(--print-shadow); }
+.paper-back:focus-visible { outline-offset: -5px; }
+.kind { font-size: 12px; color: var(--muted); }
+.detail-date { margin: 3px 0 20px; font: 400 clamp(23px, 5vw, 32px)/1.4 var(--latin); letter-spacing: .025em; }
+.metadata { margin: 0; }
+.metadata dt { padding-top: 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+.metadata dd { margin: 4px 0 14px; font-size: 15px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+.paper-back .actions { justify-content: flex-start; }
+.turn-card { display: flex; margin: 10px auto 0; min-height: 40px; align-items: center; gap: 8px; padding: 7px 16px; border: 1px solid #fffc; border-radius: 5px; color: white; font-size: 14px; }
+@media (prefers-reduced-motion: reduce) {
+  .turning-card { transition: none; }
 }
 
 /* Add and edit */
@@ -258,7 +275,6 @@ dialog::backdrop { background: #26252280; }
 .form-fields input, .form-fields textarea { width: 100%; min-width: 0; border: 1px solid var(--line); background: var(--surface); border-radius: 4px; padding: 8px 10px; font-size: 15px; }
 .form-fields textarea { resize: vertical; }
 .actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 20px; }
-.detail .actions { justify-content: flex-start; }
 .error { font-size: 13px; line-height: 1.7; color: #953d2c; margin-top: 10px; }
 .error:empty { display: none; }
 .delete-link { color: #8e483a; text-decoration: underline; text-underline-offset: 4px; font-size: 13px; }

@@ -7,7 +7,7 @@ export function element(tag, className, text) {
   return node
 }
 
-export function photoImage(url, alt, lazy = false) {
+function photoImage(url, alt, lazy = false) {
   const image = new Image()
   image.alt = alt
   image.decoding = 'async'
@@ -26,7 +26,8 @@ export function printCard(item, onOpen, lazy = false) {
   const description = item.alt || item.location || '登録した写真'
   if (onOpen) {
     card.dataset.id = item.id
-    card.setAttribute('aria-label', description + '、' + dateLabel(item.date) + 'の詳細')
+    card.setAttribute('aria-haspopup', 'dialog')
+    card.setAttribute('aria-label', description + '、' + dateLabel(item.date) + 'のチェキをめくる')
     card.addEventListener('click', () => onOpen(item, card))
   }
   const frame = element('span', 'print-image')
@@ -44,7 +45,7 @@ let opener
 let resolveOpener
 let onLeave
 let busy = false
-export const dialogBody = $('#dialog-body')
+const dialogBody = $('#dialog-body')
 
 export function showDialog(title, content, { trigger, returnFocus, leave, type = '' } = {}) {
   if (!modal.open) {

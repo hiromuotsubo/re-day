@@ -1,7 +1,7 @@
 import './style.css'
 import { dailyPicks, filteredMemories, localDate, samples, shuffled } from './memories.js'
 import { revealMemories } from './animations.js'
-import { $, dateLabel, element, notify, photoImage, printCard, showDialog, template } from './ui.js'
+import { $, dateLabel, element, notify, printCard, showDialog, template } from './ui.js'
 
 import { allPersonal } from './storage.js'
 import { confirmDeletion, openEditor } from './editor.js'
@@ -53,17 +53,26 @@ let order = []
 let mode = 'float'
 let visible = []
 function openDetail(item, trigger) {
-  const panel = element('div', 'detail')
-  const image = element('div', 'detail-image')
-  image.append(photoImage(item.image, item.alt || item.location || '登録した写真'))
-  const info = element('div', 'detail-info')
-  const kind = element('p', 'kind', item.source === 'sample' ? 'サンプル写真' : '自分の写真')
-  const date = element('p', 'detail-date', dateLabel(item.date))
-  const fields = element('dl', 'metadata')
+  const panel = template(`<div>
+    <div class="card-stage"><div class="turning-card">
+      <div class="paper-back" role="region" aria-label="チェキの裏面" tabindex="0">
+        <p class="kind"></p><p class="detail-date"></p><dl class="metadata"></dl>
+      </div>
+    </div></div>
+    <button class="turn-card" type="button"><svg class="icon" aria-hidden="true"><use href="./icons.svg#turn"/></svg><span></span></button>
+  </div>`)
+  const stage = panel.querySelector('.card-stage')
+  const card = panel.querySelector('.turning-card')
+  const back = panel.querySelector('.paper-back')
+  const turn = panel.querySelector('.turn-card')
+  const front = printCard(item)
+  card.prepend(front)
+  back.querySelector('.kind').textContent = item.source === 'sample' ? 'サンプル写真' : '自分の写真'
+  back.querySelector('.detail-date').textContent = dateLabel(item.date)
+  const fields = back.querySelector('.metadata')
   for (const [label, value] of [['場所', item.location], ['コメント', item.comment], ['タグ', item.tags.join('　')]]) {
     fields.append(element('dt', '', label), element('dd', '', value || '未設定'))
   }
-  info.append(kind, date, fields)
   if (item.source === 'personal') {
     const actions = element('div', 'actions')
     const edit = element('button', 'secondary', '編集')
@@ -72,12 +81,37 @@ function openDetail(item, trigger) {
     edit.onclick = () => openEditor({ item, onSaved: savedDetail, onCancel: reopen })
     remove.onclick = () => confirmDeletion(item, updateAlbum, reopen)
     actions.append(edit, remove)
-    info.append(actions)
+    back.append(actions)
   }
-  panel.append(image, info)
+
+  function showBack(isBack) {
+    card.classList.toggle('is-back', isBack)
+    front.inert = isBack
+    back.inert = !isBack
+    turn.querySelector('span').textContent = isBack ? '写真を見る' : '裏面を見る'
+  }
+  turn.onclick = () => showBack(!front.inert)
+  const origin = trigger?.getBoundingClientRect()
   const region = trigger?.closest('#daily') ? '#daily' : '#collection'
   const returnFocus = () => $(region)?.querySelector('[data-id="' + CSS.escape(item.id) + '"].print') || $('#add')
-  showDialog('思い出の詳細', panel, { trigger, returnFocus, type: 'detail-dialog' })
+  const animate = origin && !matchMedia('(prefers-reduced-motion: reduce)').matches
+  showBack(!animate)
+  showDialog('思い出の詳細', panel, {
+    trigger, returnFocus, type: 'flip-dialog',
+    leave: () => trigger?.classList.remove('lifted'),
+  })
+  trigger?.classList.add('lifted')
+  if (animate) {
+    // 元のチェキの位置・大きさから、手に取った位置まで同じ紙を運ぶ。
+    const dest = stage.getBoundingClientRect()
+    const x = origin.left - dest.left
+    const y = origin.top - dest.top
+    stage.animate([
+      { transform: `translate(${x}px, ${y}px) scale(${origin.width / dest.width}, ${origin.height / dest.height})` },
+      { transform: 'none' },
+    ], { duration: 600, easing: 'cubic-bezier(.22,.68,.25,1)' })
+    showBack(true)
+  }
 }
 
 function renderDaily() {
@@ -161,7 +195,7 @@ $('#guide').addEventListener('click', () => {
   showDialog('使い方', template(`<div class="prose">
     <section><h3>毎日、2枚の思い出に出会う</h3><p>「今日の2枚」は毎日変わります。登録した写真を優先して、足りない分はサンプルから選びます。</p></section>
     <section><h3>アルバムを眺める</h3><p>スクロールするとチェキが順番に現れます。「一覧」に切り替えたり、タグや撮影日で写真を探したりできます。</p></section>
-    <section><h3>自分の写真を残す</h3><p>「写真を追加」で1枚選び、日付や言葉を添えて保存します。チェキを開くと詳細を確認でき、自分の写真は後から編集・削除できます。</p></section>
+    <section><h3>自分の写真を残す</h3><p>「写真を追加」で1枚選び、日付や言葉を添えて保存します。チェキを押すと裏返り、場所・コメント・タグが読めます。「写真を見る」で表に戻せます。自分の写真は裏面から編集・削除できます。</p></section>
     <section><h3>別の端末へ移す</h3><p>設定から写真をZIPで書き出し、移行先のブラウザで復元してください。</p></section></div>`))
 })
 
