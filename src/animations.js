@@ -1,74 +1,110 @@
 const visibleFraction = 0.25
 const tilt = {
-  maxDegrees: 4,
-  degreesPerSpeed: 3, // 1px/ms のスクロールに対する角度
-  minSpeed: 0.035,
-  smoothingMs: 80,
-  returnMs: 500,
+  startSpeed: 6,    // CSS px/ms
+  endSpeed: 3.5,
+  qualifyMs: 130,
+  speedWindowMs: 32,
+  maxSampleGapMs: 65,
+  maxDegrees: 3,
+  riseMs: 500,
+  holdMs: 250,
+  returnMs: 800,
 }
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
 const seen = new Set()
 const visible = new Set()
 let cards = []
+
+let sampleY = 0
+let sampleStart = 0
+let lastScroll = null
+let candidateDirection = 0
+let candidateSince = 0
+let gust = null
 let frame = 0
-let previousY = window.scrollY
-let previousFrame = 0
-let lastMovement = 0
-let targetAngle = 0
-let angle = 0
+let cssAngle = ''
 
-function updateTilt(now) {
-  frame = 0
-  const y = window.scrollY
-  const delta = y - previousY
-  const elapsed = Math.max(1, now - previousFrame)
-  const sinceMovement = Math.max(1, now - lastMovement)
-  previousFrame = now
-  previousY = y
+function paintTilt(degrees) {
+  const value = degrees ? degrees.toFixed(3) + 'deg' : ''
+  if (value === cssAngle) return
+  cssAngle = value
+  for (const card of visible) card.style.setProperty('--scroll-tilt', value)
+}
 
-  if (delta) {
-    const speed = delta / sinceMovement
-    targetAngle = Math.abs(speed) < tilt.minSpeed ? 0
-      : Math.max(-tilt.maxDegrees, Math.min(tilt.maxDegrees, speed * tilt.degreesPerSpeed))
-    lastMovement = now
-  } else if (sinceMovement > 32) {
-    // スクロールイベントの間が1フレーム空いても、すぐには揺れを止めない。
-    targetAngle = 0
-  }
+function ease(progress) {
+  const t = Math.max(0, Math.min(1, progress))
+  return t * t * (3 - 2 * t)
+}
 
-  const smoothing = targetAngle === 0 ? tilt.returnMs / 6 : tilt.smoothingMs
-  angle += (targetAngle - angle) * (1 - Math.exp(-elapsed / smoothing))
-  if (!targetAngle && (Math.abs(angle) < 0.01 || now - lastMovement >= tilt.returnMs)) angle = 0
-  for (const card of visible) {
-    if (angle) card.style.setProperty('--scroll-tilt', angle.toFixed(3) + 'deg')
-    else card.style.removeProperty('--scroll-tilt')
-  }
-  if (angle || targetAngle) frame = requestAnimationFrame(updateTilt)
+function animateTilt(now) {
+  const release = (now - gust.lastFast - tilt.holdMs) / tilt.returnMs
+  if (release >= 1) { stopTilt(); return }
+
+  // 入力が途切れたら、それまでに達した角度で余韻を保つ。
+  const movingUntil = Math.min(now, gust.lastFast + tilt.maxSampleGapMs)
+  gust.riseTime += Math.max(0, movingUntil - gust.lastFrame)
+  gust.lastFrame = now
+  const peak = gust.direction * tilt.maxDegrees * ease(gust.riseTime / tilt.riseMs)
+  paintTilt(peak * (1 - ease(release)))
+  frame = requestAnimationFrame(animateTilt)
 }
 
 function onScroll() {
-  if (!visible.size) { previousY = window.scrollY; return }
-  if (frame) return
-  previousFrame = performance.now() - 1000 / 60
-  lastMovement = previousFrame
-  frame = requestAnimationFrame(updateTilt)
+  const now = performance.now()
+  const y = window.scrollY
+  if (!visible.size || lastScroll === null || now - lastScroll > tilt.maxSampleGapMs) {
+    candidateDirection = 0
+    sampleStart = now
+    sampleY = y
+  }
+  lastScroll = now
+  // 短い区間の平均速度を使い、イベントごとの移動量のばらつきをならす。
+  const elapsed = now - sampleStart
+  if (elapsed < tilt.speedWindowMs) return
+  const speed = (y - sampleY) / elapsed
+  sampleStart = now
+  sampleY = y
+  if (gust) {
+    // 復帰が始まったら、逆方向の入力でも正面まで戻し切る。
+    if (now - gust.lastFast < tilt.holdMs &&
+        speed * gust.direction >= tilt.endSpeed) {
+      gust.lastFast = now
+    }
+    return
+  }
+
+  if (Math.abs(speed) < tilt.startSpeed) { candidateDirection = 0; return }
+  const direction = Math.sign(speed)
+  if (direction !== candidateDirection) {
+    candidateDirection = direction
+    candidateSince = now - elapsed
+  }
+  if (now - candidateSince < tilt.qualifyMs) return
+
+  gust = { direction, lastFast: now, lastFrame: now, riseTime: 0 }
+  frame = requestAnimationFrame(animateTilt)
 }
 
 function stopTilt() {
   cancelAnimationFrame(frame)
   frame = 0
-  angle = 0
-  targetAngle = 0
-  previousY = window.scrollY
+  gust = null
+  lastScroll = null
+  candidateDirection = 0
+  paintTilt(0)
 }
 
 const observer = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
   let delay = 0
   for (const { target, isIntersecting, intersectionRatio } of entries) {
     if (!target.isConnected) continue
-    if (isIntersecting && !reducedMotion.matches) visible.add(target)
-    else if (visible.delete(target)) target.style.removeProperty('--scroll-tilt')
+    if (isIntersecting && !reducedMotion.matches) {
+      visible.add(target)
+      if (cssAngle) target.style.setProperty('--scroll-tilt', cssAngle)
+    } else if (visible.delete(target)) {
+      target.style.removeProperty('--scroll-tilt')
+    }
 
     if (intersectionRatio < visibleFraction || seen.has(target.dataset.id)) continue
     seen.add(target.dataset.id)
@@ -85,7 +121,6 @@ export function observeMemories(nodes) {
   observer?.disconnect()
   window.removeEventListener('scroll', onScroll)
   stopTilt()
-  for (const card of visible) card.style.removeProperty('--scroll-tilt')
   visible.clear()
   if (!observer) return
   for (const node of cards) {
