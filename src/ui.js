@@ -32,6 +32,9 @@ export function printCard(item, onOpen, lazy = false) {
   }
   const frame = element('span', 'print-image')
   frame.append(photoImage(item.image, description, lazy))
+  if (onOpen) {
+    frame.append(template('<span class="flip-hint" aria-hidden="true"><svg class="icon"><use href="./icons.svg#turn"/></svg></span>'))
+  }
   const date = element(item.date ? 'time' : 'span', 'print-date', dateLabel(item.date))
   if (item.date) date.dateTime = item.date
   else date.classList.add('unknown')
