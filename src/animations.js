@@ -1,4 +1,4 @@
-const visibleFraction = 0.25
+const revealInset = 0.15  // 画面下端からの距離をビューポートの高さに対する割合で指定
 const tilt = {
   startSpeed: 6,    // CSS px/ms
   endSpeed: 3.5,
@@ -95,36 +95,76 @@ function stopTilt() {
   paintTilt(0)
 }
 
-const observer = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
-  for (const { target, isIntersecting, intersectionRatio } of entries) {
+let revealObserver
+let insetPixels
+let initialViewport
+
+function revealCard(card) {
+  seen.add(card.dataset.id)
+  card.classList.replace('reveal', 'revealed')
+  revealObserver?.unobserve(card)
+}
+
+function observeRevealLine() {
+  // rootMargin の % は横幅を基準にするため、高さから px を求める。
+  const inset = Math.round(document.documentElement.clientHeight * revealInset)
+  if (revealObserver && inset === insetPixels) return
+  insetPixels = inset
+  revealObserver?.disconnect()
+  revealObserver = new IntersectionObserver(entries => {
+    for (const { target, isIntersecting } of entries) {
+      if (isIntersecting && target.isConnected) revealCard(target)
+    }
+  }, { rootMargin: `0px 0px -${inset}px 0px` })
+  for (const card of cards) {
+    if (seen.has(card.dataset.id)) continue
+    revealObserver.observe(card)
+    card.classList.add('reveal')
+  }
+}
+
+const viewportObserver = typeof IntersectionObserver === 'function' ? new IntersectionObserver(entries => {
+  for (const { target, isIntersecting } of entries) {
     if (!target.isConnected) continue
+    if (isIntersecting && (initialViewport || reducedMotion.matches)) revealCard(target)
     if (isIntersecting && !reducedMotion.matches) {
       visible.add(target)
       if (cssAngle) target.style.setProperty('--scroll-tilt', cssAngle)
     } else if (visible.delete(target)) {
       target.style.removeProperty('--scroll-tilt')
     }
-
-    if (intersectionRatio < visibleFraction || seen.has(target.dataset.id)) continue
-    seen.add(target.dataset.id)
-    target.classList.replace('reveal', 'revealed')
   }
+  initialViewport = false
   if (!visible.size) stopTilt()
-}, { threshold: [0, visibleFraction] }) : null
+}) : null
 
 export function observeMemories(nodes) {
-  cards = nodes
-  observer?.disconnect()
+  viewportObserver?.disconnect()
+  revealObserver?.disconnect()
+  revealObserver = null
+  window.removeEventListener('resize', observeRevealLine)
   window.removeEventListener('scroll', onScroll)
   stopTilt()
   visible.clear()
-  if (!observer) return
-  for (const node of cards) {
-    node.classList.remove('revealed')
-    node.classList.toggle('reveal', !reducedMotion.matches && !seen.has(node.dataset.id))
-    observer.observe(node)
+  cards = nodes
+  if (!viewportObserver || !cards.length) return
+  initialViewport = true
+  for (const card of cards) {
+    card.classList.remove('reveal', 'revealed')
+    viewportObserver.observe(card)
   }
-  if (cards.length && !reducedMotion.matches) window.addEventListener('scroll', onScroll, { passive: true })
+  if (reducedMotion.matches) return
+  observeRevealLine()
+  window.addEventListener('resize', observeRevealLine)
+  window.addEventListener('scroll', onScroll, { passive: true })
 }
+
+document.querySelector('#collection').addEventListener('focusin', event => {
+  const card = event.target.closest('.reveal')
+  if (card) {
+    card.classList.remove('reveal')
+    revealCard(card)
+  }
+})
 
 reducedMotion.addEventListener('change', () => observeMemories(cards))

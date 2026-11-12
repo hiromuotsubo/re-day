@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#292927">
     <meta name="description" content="毎日届く2枚の写真と、自分のブラウザに保存するチェキのアルバム。">
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/src/style.css">
     <title>re:day｜思い出のアルバム</title>
   </head>
   <body id="top">
@@ -45,7 +46,8 @@
           <label class="select-field"><span>並び順</span><select id="sort"><option value="random">ランダム</option><option value="new">新しい日付順</option><option value="old">古い日付順</option></select></label>
           <button id="shuffle" class="text-action"><svg class="icon"><use href="./icons.svg#shuffle"/></svg>再シャッフル</button>
         </div>
-        <div id="collection" class="collection float" aria-label="思い出の写真"></div>
+        <noscript><p class="note">サンプル写真を表示しています。自分の写真を開くにはJavaScriptを有効にしてください。</p></noscript>
+        <div id="collection" class="collection gallery" aria-label="思い出の写真"><!-- sample-prints --></div>
         <div id="empty" class="empty" hidden><svg class="icon"><use href="./icons.svg#photo"/></svg><p></p><button class="secondary"></button></div>
       </section>
     </main>
@@ -55,7 +57,6 @@
       <div id="dialog-body"></div>
     </dialog>
     <div id="notice" class="notice" role="status"></div>
-    <noscript>re:dayを利用するには、ブラウザのJavaScriptを有効にしてください。</noscript>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

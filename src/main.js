@@ -1,4 +1,3 @@
-import './style.css'
 import { dailyPicks, filteredMemories, localDate, samples, seasonForDate, shuffled } from './memories.js'
 import { observeMemories } from './animations.js'
 import { $, dateLabel, element, notify, printCard, showDialog, template } from './ui.js'
