@@ -25,9 +25,10 @@
   --summer: #dceef6;
   --autumn: #f3e2ca;
   --winter: #e5e8f3;
-  --season-opacity: .56;
-  --season-size: 190%;
-  --season-core: 35%;
+  --season-opacity: .76;
+  --season-size: 200%;
+  --season-core: 38%;
+  --season-fade: 82%;
   --surface: #fff;
   --ink: #262522;
   --muted: #6a655e;
@@ -125,7 +126,10 @@ main { isolation: isolate; overflow: clip; }
   inset: calc((100% - var(--season-size)) / 2);
   z-index: -1;
   pointer-events: none;
-  background: radial-gradient(ellipse closest-side, var(--season-color) var(--season-core), transparent 100%);
+  background: radial-gradient(ellipse closest-side,
+    var(--season-color) var(--season-core),
+    color-mix(in srgb, var(--season-color) 24%, transparent) var(--season-fade),
+    transparent 100%);
   opacity: var(--season-opacity);
 }
 
